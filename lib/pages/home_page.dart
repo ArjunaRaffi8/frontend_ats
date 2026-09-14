@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import '../config/api_config.dart';
 import 'article_detail_page.dart';
 
 class HomePage extends StatefulWidget {
@@ -17,7 +18,7 @@ class _HomePageState extends State<HomePage> {
   Future<void> getPosts() async {
     try {
       final response = await http.get(
-        Uri.parse('http://localhost:3000/api/v1/posts/posts'),
+        Uri.parse(ApiConfig.postsUrl),
       );
 
       if (response.statusCode == 200) {

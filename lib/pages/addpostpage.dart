@@ -1,7 +1,6 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import '../config/api_config.dart';
 
 class AddPostPage extends StatefulWidget {
   const AddPostPage({super.key});
@@ -28,7 +27,7 @@ class _AddPostPageState extends State<AddPostPage> {
 
     try {
       final response = await http.post(
-        Uri.parse(ApiConfig.postsUrl),
+        Uri.parse('http://localhost:3000/api/v1/posts/posts'),
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({
           'title': _titleController.text.trim(),
