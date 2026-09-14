@@ -14,25 +14,34 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   List articles = [];
   bool isLoading = true;
+  String? errorMessage;
 
   Future<void> getPosts() async {
+    setState(() {
+      isLoading = true;
+      errorMessage = null;
+    });
+
     try {
       final response = await http.get(
         Uri.parse(ApiConfig.postsUrl),
       );
 
       if (response.statusCode == 200) {
+        final body = jsonDecode(response.body);
         setState(() {
-          articles = jsonDecode(response.body)['data'];
+          articles = body['data'] ?? [];
           isLoading = false;
         });
       } else {
         setState(() {
+          errorMessage = 'Gagal memuat data (status ${response.statusCode})';
           isLoading = false;
         });
       }
     } catch (e) {
       setState(() {
+        errorMessage = 'Tidak dapat terhubung ke server';
         isLoading = false;
       });
       debugPrint('Error: $e');
@@ -55,13 +64,58 @@ class _HomePageState extends State<HomePage> {
       );
     }
 
+    if (errorMessage != null) {
+      return Center(
+        child: Padding(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                Icons.wifi_off_rounded,
+                size: 56,
+                color: Colors.grey.shade400,
+              ),
+              const SizedBox(height: 16),
+              Text(
+                errorMessage!,
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontFamily: 'Comic Relief',
+                  fontSize: 14,
+                  color: Colors.grey.shade600,
+                ),
+              ),
+              const SizedBox(height: 16),
+              ElevatedButton.icon(
+                onPressed: getPosts,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color.fromARGB(255, 157, 98, 40),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+                icon: const Icon(Icons.refresh, color: Colors.white, size: 18),
+                label: const Text(
+                  'Coba Lagi',
+                  style: TextStyle(
+                    fontFamily: 'Comic Relief',
+                    color: Colors.white,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
     return RefreshIndicator(
       color: const Color.fromARGB(255, 157, 98, 40),
       onRefresh: getPosts,
       child: ListView(
         padding: const EdgeInsets.fromLTRB(20, 16, 20, 24),
         children: [
-          // Header: greeting + avatar
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -71,7 +125,7 @@ class _HomePageState extends State<HomePage> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Hi! Good day! 👋',
+                      'Hi! Good day!',
                       style: TextStyle(
                         fontFamily: 'Comic Relief',
                         fontSize: 26,
@@ -111,7 +165,6 @@ class _HomePageState extends State<HomePage> {
 
           const SizedBox(height: 26),
 
-          // Section header
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
@@ -147,7 +200,6 @@ class _HomePageState extends State<HomePage> {
 
           const SizedBox(height: 18),
 
-          // Empty state
           if (articles.isEmpty)
             Padding(
               padding: const EdgeInsets.symmetric(vertical: 60),
@@ -167,7 +219,6 @@ class _HomePageState extends State<HomePage> {
               ),
             )
           else
-            // List vertikal, satu artikel per baris
             ListView.separated(
               shrinkWrap: true,
               physics: const NeverScrollableScrollPhysics(),
@@ -176,7 +227,20 @@ class _HomePageState extends State<HomePage> {
                   const SizedBox(height: 16),
               itemBuilder: (context, index) {
                 final article = articles[index];
-                return ArticleCard(article: article);
+                return ArticleCard(
+                  article: article,
+                  onTap: () async {
+                    final result = await Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => ArticleDetailPage(article: article),
+                      ),
+                    );
+                    if (result == true) {
+                      getPosts();
+                    }
+                  },
+                );
               },
             ),
         ],
@@ -187,10 +251,12 @@ class _HomePageState extends State<HomePage> {
 
 class ArticleCard extends StatelessWidget {
   final Map article;
+  final VoidCallback? onTap;
 
   const ArticleCard({
     super.key,
     required this.article,
+    this.onTap,
   });
 
   @override
@@ -201,14 +267,7 @@ class ArticleCard extends StatelessWidget {
 
     return InkWell(
       borderRadius: BorderRadius.circular(18),
-      onTap: () {
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => ArticleDetailPage(article: article),
-          ),
-        );
-      },
+      onTap: onTap,
       child: Container(
         padding: const EdgeInsets.all(10),
         decoration: BoxDecoration(
@@ -225,7 +284,6 @@ class ArticleCard extends StatelessWidget {
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Gambar di kiri
             ClipRRect(
               borderRadius: BorderRadius.circular(14),
               child: SizedBox(
@@ -261,7 +319,6 @@ class ArticleCard extends StatelessWidget {
 
             const SizedBox(width: 14),
 
-            // Judul + cuplikan konten di kanan
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
