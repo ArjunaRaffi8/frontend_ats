@@ -289,15 +289,17 @@ class _EditPostPageState extends State<EditPostPage> {
     });
 
     try {
-      final response = await http.put(
+      var request = http.MultipartRequest(
+        'PUT',
         Uri.parse('${ApiConfig.postsUrl}/${widget.article['id']}'),
-        headers: {'Content-Type': 'application/json'},
-        body: jsonEncode({
-          'categoryId': _selectedCategoryId,
-          'title': _titleController.text.trim(),
-          'content': _contentController.text.trim(),
-        }),
       );
+
+      request.fields['categoryId'] = _selectedCategoryId.toString();
+      request.fields['title'] = _titleController.text.trim();
+      request.fields['content'] = _contentController.text.trim();
+
+      var streamedResponse = await request.send();
+      var response = await http.Response.fromStream(streamedResponse);
 
       if (response.statusCode == 200) {
         if (mounted) {
