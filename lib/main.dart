@@ -1,133 +1,54 @@
 import 'package:flutter/material.dart';
-import 'package:salomon_bottom_bar/salomon_bottom_bar.dart';
-import 'pages/home_page.dart';
-import 'pages/add_post_page.dart';
-import 'pages/category_page.dart';
+import 'widgets/Navigation.dart';
 
 void main() {
-  runApp(const BlogApp());
+  runApp(const MyApp());
 }
 
-class BlogApp extends StatelessWidget {
-  const BlogApp({super.key});
+class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
+  static const Color brown = Color.fromARGB(255, 157, 98, 40);
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
+    return MaterialApp(
       debugShowCheckedModeBanner: false,
-      title: 'Blog App',
-      home: MainPage(),
-    );
-  }
-}
-
-class MainPage extends StatefulWidget {
-  const MainPage({super.key});
-
-  @override
-  State<MainPage> createState() => _MainPageState();
-}
-
-class _MainPageState extends State<MainPage> {
-  int _currentIndex = 0;
-
-  final List<Widget> _pages = const [
-    HomePage(),
-    AddPostPage(),
-    CategoryPage(),
-  ];
-
-  final _items = [
-    SalomonBottomBarItem(
-      icon: const Icon(Icons.home_outlined),
-      title: const Text("Home"),
-      selectedColor: const Color.fromARGB(255, 157, 98, 40),
-    ),
-    SalomonBottomBarItem(
-      icon: const Icon(Icons.add),
-      title: const Text("Tambah"),
-      selectedColor: const Color.fromARGB(255, 157, 98, 40),
-    ),
-    SalomonBottomBarItem(
-      icon: const Icon(Icons.category_outlined),
-      title: const Text("Category"),
-      selectedColor: const Color.fromARGB(255, 157, 98, 40),
-    ),
-  ];
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      body: SafeArea(
-        child: Column(
-          children: [
-            // 1. Header Banner Full Kanan-Kiri
-            Stack(
-              children: [
-                Image.asset(
-                  'asset/images/bencana_alam.png',
-                  width: double.infinity,
-                  height: 120, // Sesuaikan tinggi banner yang diinginkan
-                  fit: BoxFit.cover,
-                ),
-                // Judul "BlogId" di atas banner
-                Positioned(
-                  top: 16,
-                  right: 16,
-                  child: Row(
-                    children: const [
-                      Text(
-                        'Blog',
-                        style: TextStyle(
-                          fontFamily: 'Comic Relief',
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white,
-                        ),
-                      ),
-                      Text(
-                        'Id',
-                        style: TextStyle(
-                          fontFamily: 'Comic Relief',
-                          fontSize: 18,
-                          fontWeight: FontWeight.normal,
-                          color: Colors.white,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-            
-            // 2. Halaman Utama
-            Expanded(
-              child: _pages[_currentIndex],
-            ),
-          ],
+      title: 'Blog ATS',
+      theme: ThemeData(
+        brightness: Brightness.light,
+        colorScheme: ColorScheme.fromSeed(
+          seedColor: brown,
+          brightness: Brightness.light,
         ),
-      ),
-
-      bottomNavigationBar: Padding(
-        padding: const EdgeInsets.only(bottom: 16),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            SizedBox(
-              width: 400,
-              child: SalomonBottomBar(
-                currentIndex: _currentIndex,
-                items: _items,
-                onTap: (index) {
-                  setState(() {
-                    _currentIndex = index;
-                  });
-                },
-              ),
-            ),
-          ],
+        scaffoldBackgroundColor: const Color(0xFFFAF7F4),
+        appBarTheme: const AppBarTheme(
+          backgroundColor: Colors.white,
+          foregroundColor: Colors.black87,
+          elevation: 0,
         ),
+        cardTheme: CardThemeData(
+          color: Colors.white,
+          elevation: 1,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(14),
+          ),
+        ),
+        inputDecorationTheme: InputDecorationTheme(
+          filled: true,
+          fillColor: const Color(0xFFF2ECE6),
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide.none,
+          ),
+        ),
+        floatingActionButtonTheme: const FloatingActionButtonThemeData(
+          backgroundColor: brown,
+          foregroundColor: Colors.white,
+        ),
+        useMaterial3: true,
       ),
+      home: const MainNavigation(),
     );
   }
 }
